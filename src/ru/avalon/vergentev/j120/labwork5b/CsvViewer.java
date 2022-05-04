@@ -9,7 +9,8 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
 public class CsvViewer extends JFrame implements ActionListener, WindowListener {
-    JComboBox comboBox = new JComboBox();
+    String[] testComboBox = {"aaa", "bbb", "ccc", "ddd", "eee"};
+    JComboBox comboBox = new JComboBox(testComboBox);
     JButton showTable = new JButton("Show table");
     JFrame frameForTable = new JFrame();
     JScrollPane panelForTable;
@@ -27,6 +28,7 @@ public class CsvViewer extends JFrame implements ActionListener, WindowListener 
         add(showTable);
         showTable.addActionListener(this);
         add(comboBox);
+        comboBox.addActionListener(this);
     }
 
     private void addTable () {
@@ -43,10 +45,11 @@ public class CsvViewer extends JFrame implements ActionListener, WindowListener 
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == showTable) algorithmShowTablePushed();
+        if (e.getSource() == showTable) algorithmShowTableIsPushed();
+        else if (e.getSource() == comboBox) algorithmComboBoxIsChoosed();
     }
 
-    private void algorithmShowTablePushed() {
+    private void algorithmShowTableIsPushed() {
         if (!frameForTable.isShowing()) {
             addTable();
             frameForTable.setVisible(true);
@@ -54,6 +57,12 @@ public class CsvViewer extends JFrame implements ActionListener, WindowListener 
             frameForTable.dispose();
         }
     }
+
+    private void algorithmComboBoxIsChoosed() {
+        System.out.println("cry");
+    }
+
+
 
 
     @Override
