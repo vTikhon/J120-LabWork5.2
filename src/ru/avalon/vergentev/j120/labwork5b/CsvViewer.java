@@ -5,20 +5,18 @@ import javax.swing.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 
-
 public class CsvViewer extends JFrame implements ActionListener, WindowListener, ItemListener {
     File file = new File(System.getProperty("user.dir"));
     File[] files;
     StringBuilder data;
-//    String[] dataEachString, dataEachCell;
-    String[] testComboBox = {"aaa", "bbb", "ccc", "ddd", "eee"};
+//    String[] testComboBox = {"aaa", "bbb", "ccc", "ddd", "eee"};
+//    String[] testColumn = {"111", "222", "333", "444", "555"};
+//    String [][] testData = {{"a","a","a","a","a"},{"b","b","b","b","b"},{"c","c","c","c","c"}};
 //    JComboBox comboBox = new JComboBox(testComboBox);
     JComboBox comboBox;
     JButton showTable = new JButton("Show table");
     JFrame frameForTable = new JFrame();
     JScrollPane panelForTable;
-    String[] testColumn = {"111", "222", "333", "444", "555"};
-    String [][] testData = {{"a","a","a","a","a"},{"b","b","b","b","b"},{"c","c","c","c","c"}};
     JTable table = new JTable();
     String [][] datatable;
 
@@ -44,11 +42,12 @@ public class CsvViewer extends JFrame implements ActionListener, WindowListener,
     @Override
     public void itemStateChanged(ItemEvent e) {
         if (e.getItemSelectable() == comboBox) {
-            algorithmItemBoxIsSelected(comboBox);
+            getItemBoxIsSelected(comboBox);
         }
     }
 
-    private File algorithmItemBoxIsSelected(JComboBox comboBox) {
+    private File getItemBoxIsSelected(JComboBox comboBox) {
+        setTitle(String.valueOf(comboBox.getSelectedItem()));
         return (File) comboBox.getSelectedItem();
     }
 
@@ -66,7 +65,7 @@ public class CsvViewer extends JFrame implements ActionListener, WindowListener,
             frameForTable.dispose();
         } else {
             frameForTable = new JFrame();
-            table = new JTable(testData, testColumn);
+            table = new JTable(getTableFromData(), getTableFromData());
             panelForTable = new JScrollPane(table);
             frameForTable.setBounds(30, 40, 600, 600);
             frameForTable.add(panelForTable);
@@ -74,15 +73,19 @@ public class CsvViewer extends JFrame implements ActionListener, WindowListener,
     }
 
     public File[] getCsvFilesInDirectory () {
+        //директория приложения
         if (file.getPath().equals(System.getProperty("user.dir"))) {
+            //Обращаемся по всем файлам ListFiles с фильтром csv...
             files = file.listFiles(file -> file.getName().endsWith(".csv"));
+            //...этот метод принимает объект FileNameFilter на базе которого мы хотим получить файлы .csv...
+            //...поэтому проще сделать через лямбда выражение
         }
         return files;
     }
 
     //метод читающий файл и возвращающий данные в память компьютера
     public StringBuilder reader () {
-        file = new File(String.valueOf(algorithmItemBoxIsSelected(comboBox)));
+        file = new File(String.valueOf(getItemBoxIsSelected(comboBox)));
         if (!file.canRead()) throw new SecurityException("File can't be readable !!!");
         int symbolExisting;
         try {
@@ -95,18 +98,18 @@ public class CsvViewer extends JFrame implements ActionListener, WindowListener,
         } catch (IOException e) {
             e.printStackTrace();
         }
+        System.out.println(data);
         return data;
     }
 
     public String[][] getTableFromData () {
         //формируем массив отдельных строк с которым будем работать
         String [] dataEachString = reader().toString().split("\n");
-        //формируем двумерный массив таблицу для JTable
+        //формируем двумерный массив для JTable
         datatable = new String[dataEachString.length][];
         int k = 0;
         for (String i : dataEachString) {
-            String [] dataEachCell = i.split(";");
-            datatable[k] = new String[]{String.valueOf(dataEachCell)};
+            datatable[k] = i.split(";");
             k++;
         }
         return datatable;
