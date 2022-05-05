@@ -1,12 +1,12 @@
 package ru.avalon.vergentev.j120.labwork5b;
-import org.w3c.dom.ls.LSOutput;
-
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
+import java.awt.event.*;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+
 
 public class CsvViewer extends JFrame implements ActionListener, WindowListener {
     String[] testComboBox = {"aaa", "bbb", "ccc", "ddd", "eee"};
@@ -17,6 +17,12 @@ public class CsvViewer extends JFrame implements ActionListener, WindowListener 
     String[] testColumn = {"111", "222", "333", "444", "555"};
     String [][] testData = {{"a","a","a","a","a"},{"b","b","b","b","b"},{"c","c","c","c","c"}};
     JTable table = new JTable();
+
+
+    File file = new File(System.getProperty("user.dir"));
+    File[] listFiles;
+    StringBuilder data;
+    String[] dataEachString, dataEachCell;
 
     public CsvViewer() {
         setTitle("CSV Viewer");
@@ -61,6 +67,44 @@ public class CsvViewer extends JFrame implements ActionListener, WindowListener 
     private void algorithmComboBoxIsChoosed() {
         System.out.println("cry");
     }
+
+
+    //метод читающий файл и возвращающий данные в память компьютера
+    public StringBuilder reader (File file) {
+        if (!file.canRead())  throw new SecurityException("File can't be readable !!!");
+        int symbolExisting;
+        try {
+            FileReader fileReader = new FileReader(file, StandardCharsets.UTF_8);
+            data = new StringBuilder();
+            while ((symbolExisting = fileReader.read()) != -1) {
+                data.append((char)symbolExisting);
+            }
+            fileReader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return data;
+    }
+
+    public String[] getEachString () {
+        //формируем массив отдельных слов с которым будем работать
+        dataEachString = reader(file).toString().split("\n");
+        return dataEachString;
+    }
+
+    public String[] getEachCell () {
+        //формируем массив отдельных слов с которым будем работать
+        dataEachCell = reader(file).toString().split("[\n ]");
+        return dataEachCell;
+    }
+
+    public File[] getFilesInDirectory (File file) {
+        if (file.isDirectory() && file.getName().endsWith("csv")) {
+            listFiles = file.listFiles();
+        }
+        return listFiles;
+    }
+
 
 
 
