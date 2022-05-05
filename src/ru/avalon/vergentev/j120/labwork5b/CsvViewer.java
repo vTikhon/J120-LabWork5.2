@@ -1,40 +1,64 @@
 package ru.avalon.vergentev.j120.labwork5b;
-import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import javax.swing.*;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 
 
-public class CsvViewer extends JFrame implements ActionListener, WindowListener {
+public class CsvViewer extends JFrame implements ActionListener, WindowListener, ItemListener {
+    File file = new File(System.getProperty("user.dir"));
+    File[] files;
+    StringBuilder data;
+//    String[] dataEachString, dataEachCell;
     String[] testComboBox = {"aaa", "bbb", "ccc", "ddd", "eee"};
-    JComboBox comboBox = new JComboBox(testComboBox);
+//    JComboBox comboBox = new JComboBox(testComboBox);
+    JComboBox comboBox;
     JButton showTable = new JButton("Show table");
     JFrame frameForTable = new JFrame();
     JScrollPane panelForTable;
     String[] testColumn = {"111", "222", "333", "444", "555"};
     String [][] testData = {{"a","a","a","a","a"},{"b","b","b","b","b"},{"c","c","c","c","c"}};
     JTable table = new JTable();
-
-
-    File file = new File(System.getProperty("user.dir"));
-    File[] listFiles;
-    StringBuilder data;
-    String[] dataEachString, dataEachCell;
+    String [][] datatable;
 
     public CsvViewer() {
         setTitle("CSV Viewer");
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        setSize(300, 400);
+        setSize(300, 100);
         setLocationRelativeTo(null);
         setLayout(new FlowLayout());
         addWindowListener(this);
         add(showTable);
         showTable.addActionListener(this);
+        comboBox = new JComboBox(getCsvFilesInDirectory());
         add(comboBox);
-        comboBox.addActionListener(this);
+        comboBox.addItemListener(this);
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == showTable) algorithmShowTableIsPushed();
+    }
+
+    @Override
+    public void itemStateChanged(ItemEvent e) {
+        if (e.getItemSelectable() == comboBox) {
+            algorithmItemBoxIsSelected(comboBox);
+        }
+    }
+
+    private File algorithmItemBoxIsSelected(JComboBox comboBox) {
+        return (File) comboBox.getSelectedItem();
+    }
+
+    private void algorithmShowTableIsPushed() {
+        if (!frameForTable.isShowing()) {
+            addTable();
+            frameForTable.setVisible(true);
+        } else {
+            frameForTable.dispose();
+        }
     }
 
     private void addTable () {
@@ -49,29 +73,17 @@ public class CsvViewer extends JFrame implements ActionListener, WindowListener 
         }
     }
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == showTable) algorithmShowTableIsPushed();
-        else if (e.getSource() == comboBox) algorithmComboBoxIsChoosed();
-    }
-
-    private void algorithmShowTableIsPushed() {
-        if (!frameForTable.isShowing()) {
-            addTable();
-            frameForTable.setVisible(true);
-        } else {
-            frameForTable.dispose();
+    public File[] getCsvFilesInDirectory () {
+        if (file.getPath().equals(System.getProperty("user.dir"))) {
+            files = file.listFiles(file -> file.getName().endsWith(".csv"));
         }
+        return files;
     }
-
-    private void algorithmComboBoxIsChoosed() {
-        System.out.println("cry");
-    }
-
 
     //метод читающий файл и возвращающий данные в память компьютера
-    public StringBuilder reader (File file) {
-        if (!file.canRead())  throw new SecurityException("File can't be readable !!!");
+    public StringBuilder reader () {
+        file = new File(String.valueOf(algorithmItemBoxIsSelected(comboBox)));
+        if (!file.canRead()) throw new SecurityException("File can't be readable !!!");
         int symbolExisting;
         try {
             FileReader fileReader = new FileReader(file, StandardCharsets.UTF_8);
@@ -86,28 +98,19 @@ public class CsvViewer extends JFrame implements ActionListener, WindowListener 
         return data;
     }
 
-    public String[] getEachString () {
-        //формируем массив отдельных слов с которым будем работать
-        dataEachString = reader(file).toString().split("\n");
-        return dataEachString;
-    }
-
-    public String[] getEachCell () {
-        //формируем массив отдельных слов с которым будем работать
-        dataEachCell = reader(file).toString().split("[\n ]");
-        return dataEachCell;
-    }
-
-    public File[] getFilesInDirectory (File file) {
-        if (file.isDirectory() && file.getName().endsWith("csv")) {
-            listFiles = file.listFiles();
+    public String[][] getTableFromData () {
+        //формируем массив отдельных строк с которым будем работать
+        String [] dataEachString = reader().toString().split("\n");
+        //формируем двумерный массив таблицу для JTable
+        datatable = new String[dataEachString.length][];
+        int k = 0;
+        for (String i : dataEachString) {
+            String [] dataEachCell = i.split(";");
+            datatable[k] = new String[]{String.valueOf(dataEachCell)};
+            k++;
         }
-        return listFiles;
+        return datatable;
     }
-
-
-
-
 
     @Override
     public void windowOpened(WindowEvent e) {}
