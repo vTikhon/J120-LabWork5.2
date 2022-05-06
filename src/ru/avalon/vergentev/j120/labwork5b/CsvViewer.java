@@ -4,18 +4,21 @@ import java.awt.event.*;
 import javax.swing.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 public class CsvViewer extends JFrame implements  WindowListener {
     File file = new File(System.getProperty("user.dir"));
     File[] files;
     StringBuilder data;
-    JComboBox comboBox;
+    String [][] dataTable;
+    String [] dataEachString, titleTable, dataCellsOfEachString;
+    JComboBox<File[]> comboBox;
     JButton showTable = new JButton("Show table");
     JFrame frameForTable = new JFrame();
     JScrollPane panelForTable;
     JTable table;
-    String [][] dataTable;
-    String [] dataEachString, titleTable;
+    JCheckBox checkBox = new JCheckBox();
+    JLabel label = new JLabel("<<<< Have the title ???");
 
     public CsvViewer() {
         setTitle("CSV Viewer");
@@ -24,11 +27,18 @@ public class CsvViewer extends JFrame implements  WindowListener {
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
         addWindowListener(this);
-        add(showTable, BorderLayout.CENTER);
+        add(showTable, BorderLayout.NORTH);
         showTable.addActionListener(e -> {algorithmShowTableIsPushed();});
+        add(checkBox, BorderLayout.WEST);
+        checkBox.addChangeListener(e -> {isCheckBoxOn();});
+        add(label, BorderLayout.CENTER);
         comboBox = new JComboBox(getCsvFilesInDirectory());
         add(comboBox, BorderLayout.SOUTH);
         comboBox.addItemListener(e -> {getItemBoxIsSelected(comboBox);});
+    }
+
+    private boolean isCheckBoxOn() {
+        return checkBox.isSelected();
     }
 
     private File getItemBoxIsSelected(JComboBox comboBox) {
@@ -96,12 +106,20 @@ public class CsvViewer extends JFrame implements  WindowListener {
         dataEachString = reader().toString().split("\n");
         //задаём заголовок таблицы
         titleTable = dataEachString[0].split(";");
-        //формируем двумерный массив для JTable
-        dataTable = new String[dataEachString.length-1][];
-        int k = 0;
-        for (int i = 1; i < dataEachString.length; i++) {
-            dataTable[k] = dataEachString[i].split(";");
-            k++;
+        if (isCheckBoxOn()) {
+            //формируем двумерный массив для JTable
+            dataTable = new String[dataEachString.length-1][];
+            for (int i = 1; i < dataEachString.length; i++) {
+                dataTable[i-1] = dataEachString[i].split(";");
+            }
+        } else {
+            //задаём заголовок таблицы
+            for (String i : titleTable) {i = "";}
+            //формируем двумерный массив для JTable
+            dataTable = new String[dataEachString.length][];
+            for (int i = 0; i < dataEachString.length; i++) {
+                dataTable[i] = dataEachString[i].split(";");
+            }
         }
         return dataTable;
     }
