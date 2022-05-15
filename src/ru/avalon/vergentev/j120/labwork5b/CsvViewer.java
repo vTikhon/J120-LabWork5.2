@@ -5,14 +5,16 @@ import javax.swing.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 
-public class CsvViewer extends JFrame implements  WindowListener {
+public class CsvViewer extends JFrame implements WindowListener {
     private File file = new File(System.getProperty("user.dir"));
     private File[] files;
     private StringBuilder data;
     private String [] titleTable;
-    private final JComboBox comboBox;
+    private final JComboBox<File[]> comboBox;
     private JFrame frameForTable = new JFrame();
-    private final JCheckBox checkBox = new JCheckBox();
+    private final JCheckBox checkBox = new JCheckBox("<<<< Have the title ??? Check On is YES");
+
+    private final JMenu menuFile = new JMenu("Choose file");
 
     public CsvViewer() {
         setTitle("CSV Viewer");
@@ -21,23 +23,49 @@ public class CsvViewer extends JFrame implements  WindowListener {
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
         addWindowListener(this);
+
         JButton showTable = new JButton("Show table");
         add(showTable, BorderLayout.NORTH);
         showTable.addActionListener(e -> {algorithmShowTableIsPushed();});
         add(checkBox, BorderLayout.WEST);
         checkBox.addChangeListener(e -> {isCheckBoxOn();});
-        JLabel label = new JLabel("<<<< Have the title ??? Check On is YES");
-        add(label, BorderLayout.CENTER);
         comboBox = new JComboBox(getCsvFilesInDirectory());
         add(comboBox, BorderLayout.SOUTH);
         comboBox.addItemListener(e -> {getItemBoxIsSelected(comboBox);});
+
+        addJMenuBar();
     }
 
-    private boolean isCheckBoxOn () {
-        return checkBox.isSelected();
+    private void addJMenuBar() {
+        JMenuBar bar = new JMenuBar();
+        setJMenuBar(bar);
+        bar.add(menuFile);
+        addOpenFileOption();
     }
 
-    private File getItemBoxIsSelected (JComboBox comboBox) {
+    private void addOpenFileOption(){
+        JMenuItem open = new JMenuItem("Open file");
+        open.addActionListener(e -> {
+            JFileChooser chooser = new JFileChooser(System.getProperty("user.dir"));
+            chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+            int i = chooser.showOpenDialog(this);
+            if (i == JFileChooser.APPROVE_OPTION) {
+                file = chooser.getSelectedFile();
+                if (file.getName().endsWith(".csv")) {
+                    comboBox.setSelectedItem(file);
+                    if (frameForTable.isShowing()) {
+                        frameForTable.dispose();
+                    }
+                    algorithmShowTableIsPushed();
+                }
+            }
+        });
+        menuFile.add(open);
+    }
+
+    private boolean isCheckBoxOn () {return checkBox.isSelected();}
+
+    private File getItemBoxIsSelected (JComboBox<File[]> comboBox) {
         if (frameForTable.isShowing()) {
             frameForTable.dispose();
             addTable();
@@ -136,3 +164,4 @@ public class CsvViewer extends JFrame implements  WindowListener {
     @Override
     public void windowDeactivated(WindowEvent e) {}
 }
+
