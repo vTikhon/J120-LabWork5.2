@@ -4,21 +4,15 @@ import java.awt.event.*;
 import javax.swing.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 
 public class CsvViewer extends JFrame implements  WindowListener {
-    File file = new File(System.getProperty("user.dir"));
-    File[] files;
-    StringBuilder data;
-    String [][] dataTable;
-    String [] dataEachString, titleTable, dataCellsOfEachString;
-    JComboBox<File[]> comboBox;
-    JButton showTable = new JButton("Show table");
-    JFrame frameForTable = new JFrame();
-    JScrollPane panelForTable;
-    JTable table;
-    JCheckBox checkBox = new JCheckBox();
-    JLabel label = new JLabel("<<<< Have the title ???");
+    private File file = new File(System.getProperty("user.dir"));
+    private File[] files;
+    private StringBuilder data;
+    private String [] titleTable;
+    private final JComboBox comboBox;
+    private JFrame frameForTable = new JFrame();
+    private final JCheckBox checkBox = new JCheckBox();
 
     public CsvViewer() {
         setTitle("CSV Viewer");
@@ -27,21 +21,23 @@ public class CsvViewer extends JFrame implements  WindowListener {
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
         addWindowListener(this);
+        JButton showTable = new JButton("Show table");
         add(showTable, BorderLayout.NORTH);
         showTable.addActionListener(e -> {algorithmShowTableIsPushed();});
         add(checkBox, BorderLayout.WEST);
         checkBox.addChangeListener(e -> {isCheckBoxOn();});
+        JLabel label = new JLabel("<<<< Have the title ??? Check On is YES");
         add(label, BorderLayout.CENTER);
         comboBox = new JComboBox(getCsvFilesInDirectory());
         add(comboBox, BorderLayout.SOUTH);
         comboBox.addItemListener(e -> {getItemBoxIsSelected(comboBox);});
     }
 
-    private boolean isCheckBoxOn() {
+    private boolean isCheckBoxOn () {
         return checkBox.isSelected();
     }
 
-    private File getItemBoxIsSelected(JComboBox comboBox) {
+    private File getItemBoxIsSelected (JComboBox comboBox) {
         if (frameForTable.isShowing()) {
             frameForTable.dispose();
             addTable();
@@ -51,7 +47,7 @@ public class CsvViewer extends JFrame implements  WindowListener {
         return (File) comboBox.getSelectedItem();
     }
 
-    private void algorithmShowTableIsPushed() {
+    private void algorithmShowTableIsPushed () {
         if (!frameForTable.isShowing()) {
             addTable();
             frameForTable.setVisible(true);
@@ -65,8 +61,8 @@ public class CsvViewer extends JFrame implements  WindowListener {
             frameForTable.dispose();
         } else {
             frameForTable = new JFrame();
-            table = new JTable(getTableFromData (), titleTable);
-            panelForTable = new JScrollPane(table);
+            JTable table = new JTable(getTableFromData(), titleTable);
+            JScrollPane panelForTable = new JScrollPane(table);
             frameForTable.setBounds(30, 40, 600, 600);
             frameForTable.add(panelForTable);
         }
@@ -103,9 +99,10 @@ public class CsvViewer extends JFrame implements  WindowListener {
 
     public String[][] getTableFromData () {
         //формируем массив отдельных строк с которым будем работать
-        dataEachString = reader().toString().split("\n");
+        String[] dataEachString = reader().toString().split("\n");
         //задаём заголовок таблицы
         titleTable = dataEachString[0].split(";");
+        String[][] dataTable;
         if (isCheckBoxOn()) {
             //формируем двумерный массив для JTable
             dataTable = new String[dataEachString.length-1][];
